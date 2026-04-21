@@ -2,47 +2,92 @@
 // RULE ID   : cr-dotnet-0054
 // RULE NAME : Hard-coded Temp Paths
 // CATEGORY  : File System
-// DESCRIPTION: Application contains hard-coded references to Windows temporary
-//              directories like C:\Temp or assumes Windows-style path separators.
-//              These paths do not exist on non-Windows cloud platforms.
+// DESCRIPTION: FIXED - Replaced hard-coded paths with Path.GetTempPath() and Path.Combine()
 // =============================================================================
+using System;
 using System.IO;
 
 namespace SyntheticLegacyApp.FileSystem
 {
     public class HardCodedTempPaths
     {
-        // VIOLATION cr-dotnet-0054: Hard-coded Windows temp directories
-        private const string TempDirectory     = @"C:\Temp\SyntheticApp";
-        private const string WindowsTempFolder = @"C:\Windows\Temp";
+        private readonly string _tempDirectory;
+
+        public HardCodedTempPaths()
+        {
+            // FIXED: Use cross-platform Path.GetTempPath() instead of hard-coded Windows paths
+            _tempDirectory = Path.Combine(Path.GetTempPath(), "SyntheticApp");
+            Directory.CreateDirectory(_tempDirectory);
+        }
 
         public string CreateTempFile(string prefix)
         {
-            // VIOLATION cr-dotnet-0054: Hard-coded temp path with Windows backslash separator
-            string tempFile = @"C:\Temp\" + prefix + "_" +
-                              System.Guid.NewGuid().ToString("N") + ".tmp";
+            // FIXED: Use Path.Combine for cross-platform path construction
+            string tempFile = Path.Combine(
+                _tempDirectory,
+                $"{prefix}_{Guid.NewGuid():N}.tmp"
+            );
             File.WriteAllText(tempFile, string.Empty);
             return tempFile;
         }
 
         public void WriteTempData(byte[] data, string filename)
         {
-            // VIOLATION cr-dotnet-0054: Windows path separator assumed
-            string path = @"C:\Temp\SyntheticApp\" + filename;
+            // FIXED: Use Path.Combine instead of string concatenation with backslashes
+            string path = Path.Combine(_tempDirectory, filename);
             File.WriteAllBytes(path, data);
         }
 
         public string GetTempExportPath()
         {
-            // VIOLATION cr-dotnet-0054: Returns hard-coded Windows temp path
-            return @"C:\Temp\SyntheticApp\exports";
+            // FIXED: Use Path.Combine for cross-platform compatibility
+            string exportPath = Path.Combine(_tempDirectory, "exports");
+            Directory.CreateDirectory(exportPath);
+            return exportPath;
         }
 
         public void CleanupWindowsTemp()
         {
-            // VIOLATION cr-dotnet-0054: Assuming Windows system temp path
-            foreach (string f in Directory.GetFiles(WindowsTempFolder, "synapp_*.tmp"))
-                File.Delete(f);
+            // FIXED: Use Path.GetTempPath() instead of hard-coded Windows temp path
+            try
+            {
+                foreach (string f in Directory.GetFiles(_tempDirectory, "synapp_*.tmp"))
+                {
+                    try
+                    {
+                        File.Delete(f);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to delete temp file {f}: {ex.Message}");
+                    }
+                }
+            }
+            catch (DirectoryNotFoundException)
+            {
+                // Directory doesn't exist, nothing to clean up
+            }
+        }
+
+        // Additional helper method for cloud-native temp file management
+        public string CreateTempFileWithAutoCleanup(string prefix, out FileStream stream)
+        {
+            // FIXED: Create temp file with proper disposal pattern
+            string tempFile = Path.Combine(
+                _tempDirectory,
+                $"{prefix}_{Guid.NewGuid():N}.tmp"
+            );
+            
+            stream = new FileStream(
+                tempFile,
+                FileMode.Create,
+                FileAccess.ReadWrite,
+                FileShare.None,
+                4096,
+                FileOptions.DeleteOnClose // Auto-cleanup when stream is closed
+            );
+            
+            return tempFile;
         }
     }
 }

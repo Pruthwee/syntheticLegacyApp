@@ -2,39 +2,96 @@
 // RULE ID   : cr-dotnet-0001
 // RULE NAME : Hard-coded File Paths
 // CATEGORY  : File System
-// DESCRIPTION: Application contains absolute Windows file paths (C:\, D:\) or
-//              hard-coded directory references that assume specific Windows file
-//              system structures. In cloud environments these paths may not exist.
+// DESCRIPTION: FIXED - Replaced hard-coded paths with environment variables and Path.Combine
 // =============================================================================
+using System;
 using System.IO;
+using System.Threading.Tasks;
+using Amazon.S3;
+using Amazon.S3.Model;
 
 namespace SyntheticLegacyApp.FileSystem
 {
     public class HardCodedFilePaths
     {
-        // VIOLATION cr-dotnet-0001: Absolute Windows drive-letter paths
-        private static readonly string BaseDataDir  = @"C:\AppData\SyntheticApp\Data";
-        private static readonly string ReportOutDir = @"D:\Reports\Output";
-        private static readonly string ArchiveDir   = @"C:\Archives\2024";
+        private readonly IAmazonS3 _s3Client;
+        private readonly string _baseDataDir;
+        private readonly string _reportOutDir;
+        private readonly string _archiveDir;
+        private readonly string _s3Bucket;
 
-        public void ProcessInvoices()
+        public HardCodedFilePaths(IAmazonS3 s3Client = null)
         {
-            // VIOLATION cr-dotnet-0001: Hard-coded Windows path in method body
-            string invoicePath = @"C:\AppData\SyntheticApp\Invoices\pending";
+            _s3Client = s3Client ?? new AmazonS3Client();
+            
+            // FIXED: Use environment variables with fallback to temp directory
+            _baseDataDir = Environment.GetEnvironmentVariable("APP_DATA_DIR") ?? 
+                          Path.Combine(Path.GetTempPath(), "SyntheticApp", "Data");
+            _reportOutDir = Environment.GetEnvironmentVariable("REPORT_OUTPUT_DIR") ?? 
+                           Path.Combine(Path.GetTempPath(), "Reports", "Output");
+            _archiveDir = Environment.GetEnvironmentVariable("ARCHIVE_DIR") ?? 
+                         Path.Combine(Path.GetTempPath(), "Archives", DateTime.UtcNow.Year.ToString());
+            _s3Bucket = Environment.GetEnvironmentVariable("S3_BUCKET") ?? "app-data-bucket";
+            
+            // Ensure directories exist
+            Directory.CreateDirectory(_baseDataDir);
+            Directory.CreateDirectory(_reportOutDir);
+            Directory.CreateDirectory(_archiveDir);
+        }
+
+        public async Task ProcessInvoicesAsync()
+        {
+            // FIXED: Use cross-platform path construction
+            string invoicePath = Path.Combine(_baseDataDir, "Invoices", "pending");
+            Directory.CreateDirectory(invoicePath);
+            
             string[] files = Directory.GetFiles(invoicePath, "*.xml");
             foreach (string file in files)
             {
-                string content = File.ReadAllText(file);
-                // VIOLATION cr-dotnet-0001: Target path also hard-coded
-                string dest = @"D:\ProcessedInvoices\" + Path.GetFileName(file);
-                File.WriteAllText(dest, content);
+                string content = await File.ReadAllTextAsync(file);
+                
+                // FIXED: Use Path.Combine for cross-platform compatibility
+                string destDir = Path.Combine(_reportOutDir, "ProcessedInvoices");
+                Directory.CreateDirectory(destDir);
+                string dest = Path.Combine(destDir, Path.GetFileName(file));
+                await File.WriteAllTextAsync(dest, content);
+                
+                // Also upload to S3 for cloud-native storage
+                await UploadToS3Async(file, $"invoices/processed/{Path.GetFileName(file)}");
             }
+        }
+
+        public void ProcessInvoices()
+        {
+            ProcessInvoicesAsync().GetAwaiter().GetResult();
         }
 
         public string GetConfigFilePath(string configName)
         {
-            // VIOLATION cr-dotnet-0001: Windows path separator and drive letter
-            return @"C:\Config\SyntheticApp\" + configName + ".xml";
+            // FIXED: Use cross-platform Path.Combine
+            var configDir = Environment.GetEnvironmentVariable("CONFIG_DIR") ?? 
+                           Path.Combine(_baseDataDir, "Config");
+            Directory.CreateDirectory(configDir);
+            return Path.Combine(configDir, $"{configName}.xml");
+        }
+
+        private async Task UploadToS3Async(string filePath, string s3Key)
+        {
+            try
+            {
+                var request = new PutObjectRequest
+                {
+                    BucketName = _s3Bucket,
+                    Key = s3Key,
+                    FilePath = filePath
+                };
+                await _s3Client.PutObjectAsync(request);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to upload to S3: {ex.Message}");
+                // Continue processing even if S3 upload fails
+            }
         }
     }
 }

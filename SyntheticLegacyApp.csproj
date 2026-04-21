@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ============================================================
+  PROJECT : SyntheticLegacyApp
+  PURPOSE : Synthetic .NET legacy application containing
+            65 deliberate cloud-readiness anti-patterns aligned
+            to Concierto Modernize M-Basic (Cloud Readiness)
+            scan rules (cr-dotnet-0001 through cr-dotnet-0127).
+  ============================================================
+-->
+<Project ToolsVersion="15.0" DefaultTargets="Build"
+         xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
+          Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B1C2D3E4-F5A6-7890-ABCD-EF1234567890}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SyntheticLegacyApp</RootNamespace>
+    <AssemblyName>SyntheticLegacyApp</AssemblyName>
+
+    <!-- VIOLATION cr-dotnet-0025: Target framework below 4.6.1 -->
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <NuGetPackageImportStamp />
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <!-- ============================================================
+       REFERENCES — include legacy/Windows-specific assemblies
+       that trigger cloud-readiness rule violations
+       ============================================================ -->
+  <ItemGroup>
+    <!-- Standard .NET Framework references -->
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml" />
+
+    <!-- VIOLATION cr-dotnet-0033: System.Diagnostics.EventLog -->
+    <Reference Include="System.Diagnostics.EventLog" />
+
+    <!-- VIOLATION cr-dotnet-0040: Windows Registry -->
+    <Reference Include="Microsoft.Win32.Registry" />
+
+    <!-- VIOLATION cr-dotnet-0043: MSMQ -->
+    <Reference Include="System.Messaging" />
+
+    <!-- VIOLATION cr-dotnet-0060: Windows Service -->
+    <Reference Include="System.ServiceProcess" />
+
+    <!-- VIOLATION cr-dotnet-0048: ClickOnce deployment -->
+    <Reference Include="System.Deployment" />
+
+    <!-- VIOLATION cr-dotnet-0028: Microsoft Enterprise Library -->
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Common">
+      <HintPath>..\packages\EnterpriseLibrary.Common.6.0.1304\lib\net45\Microsoft.Practices.EnterpriseLibrary.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Data">
+      <HintPath>..\packages\EnterpriseLibrary.Data.6.0.1304\lib\net45\Microsoft.Practices.EnterpriseLibrary.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Logging">
+      <HintPath>..\packages\EnterpriseLibrary.Logging.6.0.1304\lib\net45\Microsoft.Practices.EnterpriseLibrary.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.ExceptionHandling">
+      <HintPath>..\packages\EnterpriseLibrary.ExceptionHandling.6.0.1304\lib\net45\Microsoft.Practices.EnterpriseLibrary.ExceptionHandling.dll</HintPath>
+    </Reference>
+
+    <!-- VIOLATION cr-dotnet-0057: Crystal Reports -->
+    <Reference Include="CrystalDecisions.CrystalReports.Engine">
+      <HintPath>..\packages\CrystalReports.13.0.2000\lib\CrystalDecisions.CrystalReports.Engine.dll</HintPath>
+    </Reference>
+    <Reference Include="CrystalDecisions.Shared">
+      <HintPath>..\packages\CrystalReports.13.0.2000\lib\CrystalDecisions.Shared.dll</HintPath>
+    </Reference>
+
+    <!-- VIOLATION cr-dotnet-0058: SharePoint Server Object Model -->
+    <Reference Include="Microsoft.SharePoint">
+      <HintPath>C:\Program Files\Common Files\Microsoft Shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll</HintPath>
+    </Reference>
+
+    <!-- VIOLATION cr-dotnet-0059: BizTalk Server -->
+    <Reference Include="Microsoft.BizTalk.Message.Interop">
+      <HintPath>C:\Program Files (x86)\Microsoft BizTalk Server\Microsoft.BizTalk.Message.Interop.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.XLANGs.BaseTypes">
+      <HintPath>C:\Program Files (x86)\Microsoft BizTalk Server\Microsoft.XLANGs.BaseTypes.dll</HintPath>
+    </Reference>
+
+    <!-- VIOLATION cr-dotnet-0047: MSBuild Tasks -->
+    <Reference Include="Microsoft.Build.Framework" />
+    <Reference Include="Microsoft.Build.Utilities.v4.0" />
+
+    <!-- VIOLATION cr-dotnet-0035: log4net -->
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.2.0.15\lib\net45\log4net.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <!-- ============================================================
+       SOURCE FILES — 65 files, one per rule
+       ============================================================ -->
+  <ItemGroup>
+    <!-- Authentication (5 rules) -->
+    <Compile Include="Authentication\ActiveDirectoryDeps.cs" />
+    <Compile Include="Authentication\CertificateStoreAccess.cs" />
+    <Compile Include="Authentication\FormsAuthentication.cs" />
+    <Compile Include="Authentication\IPAddressRestrictions.cs" />
+    <Compile Include="Authentication\WindowsAuthentication.cs" />
+
+    <!-- Configuration (6 rules) -->
+    <Compile Include="Configuration\HardCodedConnectionStrings.cs" />
+    <Compile Include="Configuration\HardCodedPortNumbers.cs" />
+    <Compile Include="Configuration\HardCodedSecrets.cs" />
+    <Compile Include="Configuration\HardCodedServiceUrls.cs" />
+    <Compile Include="Configuration\MachineConfigDeps.cs" />
+    <Compile Include="Configuration\WebConfigTransformations.cs" />
+
+    <!-- Database (4 rules) -->
+    <Compile Include="Database\SqlConnectionDirect.cs" />
+    <Compile Include="Database\SqlDependencyUsage.cs" />
+    <Compile Include="Database\SqlServerSpecific.cs" />
+    <Compile Include="Database\TransactionScopeWithDTC.cs" />
+
+    <!-- ExternalServices (1 rule) -->
+    <Compile Include="ExternalServices\SMTPLocalServer.cs" />
+
+    <!-- FileSystem (5 rules) -->
+    <Compile Include="FileSystem\DirectoryGetFilesUsage.cs" />
+    <Compile Include="FileSystem\HardCodedFilePaths.cs" />
+    <Compile Include="FileSystem\HardCodedTempPaths.cs" />
+    <Compile Include="FileSystem\LocalFileSystemWrite.cs" />
+    <Compile Include="FileSystem\SystemIOFileStorage.cs" />
+
+    <!-- LegacyFramework (10 rules) -->
+    <Compile Include="LegacyFramework\AssemblyGACRefs.cs" />
+    <Compile Include="LegacyFramework\BizTalkArtifacts.cs" />
+    <Compile Include="LegacyFramework\ClickOnceDeployment.cs" />
+    <Compile Include="LegacyFramework\CrystalReports.cs" />
+    <Compile Include="LegacyFramework\DotNetFrameworkVersion.cs" />
+    <Compile Include="LegacyFramework\EnterpriseLibrary.cs" />
+    <Compile Include="LegacyFramework\MSBuildCustomTasks.cs" />
+    <Compile Include="LegacyFramework\SharePointDependencies.cs" />
+    <Compile Include="LegacyFramework\WebFormsUsage.cs" />
+    <Compile Include="LegacyFramework\WindowsServiceBase.cs" />
+
+    <!-- Logging (3 rules) -->
+    <Compile Include="Logging\EventLogWriting.cs" />
+    <Compile Include="Logging\Log4NetFileAppender.cs" />
+    <Compile Include="Logging\TraceListenerFileOutput.cs" />
+
+    <!-- Memory (2 rules) -->
+    <Compile Include="Memory\LargeObjectHeap.cs" />
+    <Compile Include="Memory\SynchronousHttpClient.cs" />
+
+    <!-- Networking (5 rules) -->
+    <Compile Include="Networking\DotNetRemoting.cs" />
+    <Compile Include="Networking\UDPSocketProgramming.cs" />
+    <Compile Include="Networking\UnsupportedProtocols.cs" />
+    <Compile Include="Networking\WCFNetTcpBinding.cs" />
+    <Compile Include="Networking\WCFServiceHost.cs" />
+
+    <!-- Platform (9 rules) -->
+    <Compile Include="Platform\COMInterop.cs" />
+    <Compile Include="Platform\EnvironmentMachineName.cs" />
+    <Compile Include="Platform\IISModuleDeps.cs" />
+    <Compile Include="Platform\MSMQMessageQueue.cs" />
+    <Compile Include="Platform\MutexMachineWide.cs" />
+    <Compile Include="Platform\NamedPipesLocal.cs" />
+    <Compile Include="Platform\PInvokeWindowsAPIs.cs" />
+    <Compile Include="Platform\PerformanceCounters.cs" />
+    <Compile Include="Platform\RegistryAccess.cs" />
+
+    <!-- Runtime (3 rules) -->
+    <Compile Include="Runtime\ClockTimeDependencies.cs" />
+    <Compile Include="Runtime\MissingShutdownHooks.cs" />
+    <Compile Include="Runtime\StatefulMiddleware.cs" />
+
+    <!-- State (6 rules) -->
+    <Compile Include="State\IISApplicationState.cs" />
+    <Compile Include="State\MemoryCacheNoExpiry.cs" />
+    <Compile Include="State\OutputCacheInMemory.cs" />
+    <Compile Include="State\SessionStateInProc.cs" />
+    <Compile Include="State\SingletonWithState.cs" />
+    <Compile Include="State\StaticCollectionsState.cs" />
+
+    <!-- Threading (6 rules) -->
+    <Compile Include="Threading\BlockingCollectionOps.cs" />
+    <Compile Include="Threading\FixedThreadAffinity.cs" />
+    <Compile Include="Threading\HardCodedThreadPool.cs" />
+    <Compile Include="Threading\ThreadStartUsage.cs" />
+    <Compile Include="Threading\ThreadStaticAttribute.cs" />
+    <Compile Include="Threading\TimerNoSync.cs" />
+  </ItemGroup>
+
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+</Project>

@@ -5,35 +5,42 @@
 // DESCRIPTION: Application contains database connection strings directly embedded
 //              in source code. Creates security vulnerabilities, prevents
 //              environment-specific config, and violates cloud credential management.
+// FIXED: Replaced hardcoded connection strings with environment variables
 // =============================================================================
+using System;
 using System.Data.SqlClient;
 
 namespace SyntheticLegacyApp.Configuration
 {
     public class HardCodedConnectionStrings
     {
-        // VIOLATION cr-dotnet-0009: Connection string with credentials in source
-        private const string PrimaryDb =
-            "Server=prod-db01.corp.internal;Database=SyntheticAppDB;" +
-            "User Id=sa;Password=Passw0rd!2024;";
+        // FIXED: Use environment variables for connection strings
+        private readonly string PrimaryDb = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
+            ?? throw new InvalidOperationException("DATABASE_CONNECTION_STRING environment variable not set");
 
-        private const string ReportingDb =
-            "Data Source=reports-sql.corp.local;Initial Catalog=ReportsDB;" +
-            "Integrated Security=False;Uid=reports_svc;Pwd=R3p0rtsP@ss;";
+        private readonly string ReportingDb = Environment.GetEnvironmentVariable("REPORTING_DB_CONNECTION_STRING")
+            ?? throw new InvalidOperationException("REPORTING_DB_CONNECTION_STRING environment variable not set");
 
         public SqlConnection GetPrimaryConnection()
         {
-            return new SqlConnection(PrimaryDb); // VIOLATION cr-dotnet-0009
+            // TODO: Consider using AWS RDS Proxy for connection pooling
+            // TODO: For sensitive data, integrate with AWS Secrets Manager
+            return new SqlConnection(PrimaryDb);
         }
 
         public void ExecuteQuery(string sql)
         {
-            // VIOLATION cr-dotnet-0009: Inline connection string with credentials
-            using (var conn = new SqlConnection(
-                "Server=legacy-db.corp.net;Database=LegacyDB;User Id=app_user;Password=L3g@cy!;"))
+            // FIXED: Use environment variable for connection string
+            string legacyDbConnectionString = Environment.GetEnvironmentVariable("LEGACY_DB_CONNECTION_STRING")
+                ?? throw new InvalidOperationException("LEGACY_DB_CONNECTION_STRING environment variable not set");
+
+            using (var conn = new SqlConnection(legacyDbConnectionString))
             {
                 conn.Open();
-                using (var cmd = new SqlCommand(sql, conn)) cmd.ExecuteNonQuery();
+                using (var cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
     }

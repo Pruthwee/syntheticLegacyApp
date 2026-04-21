@@ -23,8 +23,8 @@
     <RootNamespace>SyntheticLegacyApp</RootNamespace>
     <AssemblyName>SyntheticLegacyApp</AssemblyName>
 
-    <!-- VIOLATION cr-dotnet-0025: Target framework below 4.6.1 -->
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <!-- FIXED cr-dotnet-0025: Updated to .NET Framework 4.8 for cloud compatibility -->
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
 
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
